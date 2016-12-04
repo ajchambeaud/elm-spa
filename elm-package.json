@@ -1,7 +1,7 @@
 {
     "version": "1.0.0",
     "summary": "Elm single page application experiment",
-    "repository": "https://github.com/ajchambeaud/elm-spa",
+    "repository": "https://github.com/ajchambeaud/elm-spa.git",
     "license": "MIT",
     "source-directories": [
         "src/elm"

@@ -6,7 +6,7 @@
   "author": "AJ Chambeaud",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ajchambeaud/elm-spa"
+    "url": "https://github.com/ajchambeaud/elm-spa.git"
   },
   "scripts": {
     "start": "webpack-dev-server --hot --inline --content-base src/",

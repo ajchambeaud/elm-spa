@@ -1,4 +1,4 @@
-module Books exposing (..)
+module Main exposing (..)
 
 import String exposing (..)
 import Html exposing (..)
@@ -6,7 +6,11 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Html.App as App
 
+import Bootstrap exposing (..)
+
+
 -- model
+
 
 type alias Book =
   { id : Int
@@ -30,6 +34,7 @@ initModel =
 
 -- update 
 
+
 type Msg
   = ShowForm
   | Select Int
@@ -46,7 +51,7 @@ update msg model =
     ShowForm ->
       { model 
       | formData = Just
-          { id = List.length model.books
+          { id = List.length model.books + 1
           , title = ""
           , author = ""
           , reading = False
@@ -111,8 +116,8 @@ updateFormData formData msg =
 
     _ -> formData
 
--- view 
 
+-- view 
 
 
 emptyData : Maybe Book -> Bool
@@ -130,74 +135,155 @@ actionButton formData =
       then ShowForm
       else Cancel
       )
+    , class "btn btn-default pull-right"        
     ] 
     [ text (if (emptyData formData) then "Add Book" else "Cancel") ]
 
 
+textInput : (String -> msg) -> String -> Html msg
+textInput msg textValue =
+  input 
+    [ class "form-control"
+    , type' "text"
+    , value textValue
+    , onInput msg
+    ] []
 
-bookForm : Book -> Html Msg
-bookForm book =
+
+numberInput : (String -> msg) -> String -> Html msg
+numberInput msg textValue =
+  input 
+    [ class "form-control"
+    , id "read"
+    , type' "number"
+    , value textValue
+    , onInput msg
+    ] []
+
+
+bookForm : Book -> Bool -> Html Msg
+bookForm book showId=
   Html.form []
-     [ div []
-        [ label [] [text "Id"]
+    [ div 
+        [ classList [("form-group", True), ("hidden", not showId)] ]
+        [ label [ for "id" ] [ text "Id" ]
         , input 
-            [ type' "text"
+            [ class "form-control"
+            , id "id"
+            , type' "text"
             , disabled True
             , value (toString book.id)
-            ] []
+            ]
+            []
         ]
     
-     , div []
-        [ label [] [text "Title"]
-        , input
-            [ type' "text"
-            , value book.title
-            , onInput UpdateTitle
-            ] []
+     , div [ class "form-group" ]
+        [ label [ for "title" ] [ text "Title" ]
+        , textInput UpdateTitle book.title
         ]
 
-     , div []
-        [ label [] [text "Author"]
-        , input
-            [ type' "text"
-            , value book.author
-            , onInput UpdateAuthor
-            ] []
+     , div [ class "form-group" ]
+        [ label [ for "author" ] [text "Author"]
+        , textInput UpdateAuthor book.author
         ]
   
-     , div []
-        [ label [] [text "Reading"]
-        , input
-            [ type' "checkbox"
-            , onCheck UpdateReading
-            ] []
+    , div [ class "checkbox" ]
+        [ label []
+            [ input 
+              [ type' "checkbox", id "reading", onCheck UpdateReading ] []
+            , text "Reading"
+            ]
         ]
 
-     , div []
-        [ label [] [text "Read"]
-        , input
-            [ type' "number"
-            , value (toString book.read)
-            , onInput UpdateRead
-            ] []
+     , div [ class "form-group" ]
+        [ label [ for "reading" ] [text "Read"]
+        , numberInput UpdateRead (toString book.read)
         ]
+  
+      , button 
+        [ class "btn btn-default"
+        , type' "button"
+        , onClick Save
+        ]
+        [ text "Submit" ]
     ]
 
+
+bookRow : Book -> Html Msg
+bookRow book = 
+  tr []
+    [ th [ scope "row" ]
+        [ text (toString book.id) ]
+    , td []
+        [ text book.title ]
+    , td []
+        [ text book.author ]
+    , td []
+        [ text ( 
+            if book.reading 
+              then "Yes"
+              else "No" 
+            ) 
+        ]
+    , td []
+        [ text (toString (book.read) ++ "%")]
+    ]
+
+
+booksTable : List Book -> Html Msg
+booksTable books =
+  table [ class "table" ]
+      [ thead []
+          [ tr []
+              [ th []
+                  [ text "#" ]
+              , th []
+                  [ text "Title" ]
+              , th []
+                  [ text "Author" ]
+              , th []
+                  [ text "Reading" ]
+              , th []
+                  [ text "% readed" ]
+              ]
+          ]
+      , tbody [] ( List.map bookRow books)
+      ]
 
 view : Model -> Html Msg
 view model =
-  div []
-    [ h2 [] [text "My book list"]
-    , actionButton model.formData
-    , ( case model.formData of 
-          Just book ->
-            bookForm book
+  let
+    col = Bootstrap.col
+  in
+    container Fixed []
+      [ row []
+          [ col [ Md 12 ] 
+              [ h2 [] [text "My book list"] ]
+          ]
 
-          Nothing ->
-            div [][]
-      )
-    , div [] [text (toString model)]
-    ]
+      , row []
+          [ col [ Md 10 ] []
+          , col [ Md 2 ]
+            [ actionButton model.formData ]
+          ]
+    
+      , ( case model.formData of 
+            Just book ->
+              row []
+                [ col [ Md 12 ] 
+                    [ bookForm book False ]
+                ]
+            Nothing ->
+              row [][]
+        )
+
+      , row []
+          [ col [ Md 12 ] 
+              [ hr [][]
+              , booksTable model.books
+              ]
+          ]
+      ]
 
 
 main : Program Never
