@@ -71,7 +71,7 @@ update msg model =
       { model
       | books = 
           case model.formData of 
-            Just book -> book :: model.books
+            Just book -> saveBook book model.books
             Nothing -> model.books
 
       , formData = Nothing
@@ -90,6 +90,18 @@ update msg model =
               Nothing -> model.formData
           )
       }
+
+
+saveBook : Book -> List Book -> List Book
+saveBook book list =
+  let
+    ids = List.map (\item -> item.id) list
+  in
+    if List.member book.id ids then
+      List.map (\item -> if item.id == book.id then book else item) list
+    else
+      book :: list
+
 
 updateFormData : Book -> Msg -> Book
 updateFormData formData msg =
@@ -205,7 +217,7 @@ bookForm book showId=
         , type' "button"
         , onClick Save
         ]
-        [ text "Submit" ]
+        [ text "Save" ]
     ]
 
 
@@ -227,8 +239,19 @@ bookRow book =
         ]
     , td []
         [ text (toString (book.read) ++ "%")]
+    , actionsRow book
     ]
 
+actionsRow : Book -> Html Msg
+actionsRow book =
+  td []
+    [ button 
+        [ class "btn btn-primary btn-xs"
+        , type' "button"
+        , onClick (Select book.id)
+        ]
+        [ text "Edit" ]
+    ]
 
 booksTable : List Book -> Html Msg
 booksTable books =
@@ -245,6 +268,8 @@ booksTable books =
                   [ text "Reading" ]
               , th []
                   [ text "% readed" ]
+              , th []
+                  [ text "Actions" ]
               ]
           ]
       , tbody [] ( List.map bookRow books)
