@@ -3,10 +3,8 @@ module Main exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Html.App as App
-
 import Bootstrap exposing (..)
-import Categories 
+import Categories
 import Books
 
 
@@ -19,6 +17,7 @@ type alias Model =
     , categories : Categories.Model
     }
 
+
 initModel : Model
 initModel =
     { page = BooksPage
@@ -26,12 +25,14 @@ initModel =
     , categories = Categories.initModel
     }
 
+
 type Page
     = BooksPage
     | CategoriesPage
 
 
--- update 
+
+-- update
 
 
 type Msg
@@ -61,33 +62,35 @@ update msg model =
             }
 
 
--- view 
+
+-- view
 
 
 sideMenuStyle : Attribute msg
 sideMenuStyle =
-  style
-    [ ("margin-top", "1em") ]
+    style
+        [ ( "margin-top", "1em" ) ]
 
 
 sideMenu : Page -> Html Msg
-sideMenu page = 
+sideMenu page =
     ul [ class "nav nav-pills nav-stacked", sideMenuStyle ]
-        [ li 
-            [ classList [("active", page == BooksPage)]
+        [ li
+            [ classList [ ( "active", page == BooksPage ) ]
             , attribute "role" "presentation"
             ]
-            [ a [ href "#"
-                , onClick (ChangePage BooksPage) 
+            [ a
+                [ href "#"
+                , onClick (ChangePage BooksPage)
                 ]
-                [ text "Books"]
+                [ text "Books" ]
             ]
-
-        , li 
-            [ classList [("active", page == CategoriesPage)]
+        , li
+            [ classList [ ( "active", page == CategoriesPage ) ]
             , attribute "role" "presentation"
             ]
-            [ a [ href "#"
+            [ a
+                [ href "#"
                 , onClick (ChangePage CategoriesPage)
                 ]
                 [ text "Categories" ]
@@ -101,23 +104,25 @@ view model =
         page =
             case model.page of
                 BooksPage ->
-                    App.map BooksMsg
+                    Html.map BooksMsg
                         (Books.view model.books)
 
                 CategoriesPage ->
-                    App.map CategoriesMsg
+                    Html.map CategoriesMsg
                         (Categories.view model.categories)
 
-        col = Bootstrap.col
+        col =
+            Bootstrap.col
     in
-        container Fluid []
-          [ row []
-            [ col [ Md 2 ] [ sideMenu model.page]
-
-            , col [ Md 10 ] [ page ]
+        container Fluid
+            []
+            [ row []
+                [ col [ Md 2 ] [ sideMenu model.page ]
+                , col [ Md 10 ] [ page ]
+                ]
             ]
-          ]
 
-main : Program Never
+
+main : Program Never Model Msg
 main =
-  App.beginnerProgram { model = initModel, view = view, update = update }
+    beginnerProgram { model = initModel, view = view, update = update }
