@@ -1,128 +1,11 @@
-module Categories exposing (..)
+module Categories.View exposing (root)
 
+import RemoteData exposing (..)
 import Html exposing (..)
-import Html.Attributes exposing (..)
+import Html.Attributes exposing (id, class, classList, src, name, type_, title, value, for, disabled, scope)
+import Categories.Types exposing (..)
 import Html.Events exposing (..)
 import Bootstrap exposing (..)
-
-
--- model
-
-
-type alias Category =
-    { id : Int
-    , desc : String
-    }
-
-
-type alias Model =
-    { categories : List Category
-    , formData : Maybe Category
-    }
-
-
-initModel : Model
-initModel =
-    { categories = []
-    , formData = Nothing
-    }
-
-
-
--- update
-
-
-type Msg
-    = ShowForm
-    | Select Int
-    | UpdateDesc String
-    | Save
-    | Cancel
-
-
-update : Msg -> Model -> Model
-update msg model =
-    case msg of
-        ShowForm ->
-            { model
-                | formData =
-                    Just
-                        { id = List.length model.categories + 1
-                        , desc = ""
-                        }
-            }
-
-        Select id ->
-            { model
-                | formData =
-                    model.categories
-                        |> List.filter (\item -> item.id == id)
-                        |> List.head
-            }
-
-        Save ->
-            { model
-                | categories =
-                    case model.formData of
-                        Just category ->
-                            saveCategory category model.categories
-
-                        Nothing ->
-                            model.categories
-                , formData = Nothing
-            }
-
-        Cancel ->
-            { model
-                | formData = Nothing
-            }
-
-        _ ->
-            { model
-                | formData =
-                    (case model.formData of
-                        Just category ->
-                            Just (updateFormData category msg)
-
-                        Nothing ->
-                            model.formData
-                    )
-            }
-
-
-saveCategory : Category -> List Category -> List Category
-saveCategory category list =
-    let
-        ids =
-            List.map (\item -> item.id) list
-    in
-        if List.member category.id ids then
-            List.map
-                (\item ->
-                    if item.id == category.id then
-                        category
-                    else
-                        item
-                )
-                list
-        else
-            category :: list
-
-
-updateFormData : Category -> Msg -> Category
-updateFormData formData msg =
-    case msg of
-        UpdateDesc value ->
-            { formData
-                | desc = value
-            }
-
-        _ ->
-            formData
-
-
-
--- view
 
 
 emptyData : Maybe Category -> Bool
@@ -229,25 +112,36 @@ actionsRow category =
         ]
 
 
-categoriesTable : List Category -> Html Msg
-categoriesTable categories =
-    table [ class "table" ]
-        [ thead []
-            [ tr []
-                [ th []
-                    [ text "#" ]
-                , th []
-                    [ text "Description" ]
-                , th []
-                    [ text "Actions" ]
+categorysTable : WebData (List Category) -> Html Msg
+categorysTable categorysResponse =
+    case categorysResponse of
+        Success categorys ->
+            table [ class "table" ]
+                [ thead []
+                    [ tr []
+                        [ th []
+                            [ text "#" ]
+                        , th []
+                            [ text "Description" ]
+                        , th []
+                            [ text "Actions" ]
+                        ]
+                    ]
+                , tbody [] (List.map categoryRow categorys)
                 ]
-            ]
-        , tbody [] (List.map categoryRow categories)
-        ]
+
+        Loading ->
+            div [] [ text "Loading..." ]
+
+        NotAsked ->
+            div [] [ text "Initializing.." ]
+
+        Failure err ->
+            div [] [ text ("Error: " ++ toString err) ]
 
 
-view : Model -> Html Msg
-view model =
+root : Model -> Html Msg
+root model =
     let
         col =
             Bootstrap.col
@@ -275,7 +169,7 @@ view model =
             , row []
                 [ col [ Md 12 ]
                     [ hr [] []
-                    , categoriesTable model.categories
+                    , categorysTable model.categories
                     ]
                 ]
             ]

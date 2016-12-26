@@ -1,6 +1,9 @@
 # elm-spa
 
-Elm single page application experiment based on 
+Elm single page application experiment based on https://github.com/moarwick/elm-webpack-starter
 
-See https://github.com/moarwick/elm-webpack-starter for the webpack setup
+## Run
 
+```bash
+npm install && npm start
+```

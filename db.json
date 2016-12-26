@@ -1,0 +1,17 @@
+{
+  "books": [
+    {
+      "id": 1,
+      "title": "The Hobbit",
+      "author": "J.R.R. Tokien",
+      "reading": false,
+      "read": 100
+    }
+  ],
+  "categories": [
+    {
+      "id": 1,
+      "desc": "Fantasy"
+    } 
+  ]
+}

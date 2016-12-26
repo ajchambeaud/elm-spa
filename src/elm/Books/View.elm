@@ -1,153 +1,11 @@
-module Books exposing (..)
+module Books.View exposing (root)
 
-import String exposing (..)
+import RemoteData exposing (..)
 import Html exposing (..)
-import Html.Attributes exposing (..)
+import Html.Attributes exposing (id, class, classList, src, name, type_, title, value, for, disabled, scope)
+import Books.Types exposing (..)
 import Html.Events exposing (..)
 import Bootstrap exposing (..)
-
-
--- model
-
-
-type alias Book =
-    { id : Int
-    , title : String
-    , author : String
-    , reading : Bool
-    , read : Int
-    }
-
-
-type alias Model =
-    { books : List Book
-    , formData : Maybe Book
-    }
-
-
-initModel : Model
-initModel =
-    { books = []
-    , formData = Nothing
-    }
-
-
-
--- update
-
-
-type Msg
-    = ShowForm
-    | Select Int
-    | UpdateTitle String
-    | UpdateAuthor String
-    | UpdateReading Bool
-    | UpdateRead String
-    | Save
-    | Cancel
-
-
-update : Msg -> Model -> Model
-update msg model =
-    case msg of
-        ShowForm ->
-            { model
-                | formData =
-                    Just
-                        { id = List.length model.books + 1
-                        , title = ""
-                        , author = ""
-                        , reading = False
-                        , read = 0
-                        }
-            }
-
-        Select id ->
-            { model
-                | formData =
-                    model.books
-                        |> List.filter (\item -> item.id == id)
-                        |> List.head
-            }
-
-        Save ->
-            { model
-                | books =
-                    case model.formData of
-                        Just book ->
-                            saveBook book model.books
-
-                        Nothing ->
-                            model.books
-                , formData = Nothing
-            }
-
-        Cancel ->
-            { model
-                | formData = Nothing
-            }
-
-        _ ->
-            { model
-                | formData =
-                    (case model.formData of
-                        Just book ->
-                            Just (updateFormData book msg)
-
-                        Nothing ->
-                            model.formData
-                    )
-            }
-
-
-saveBook : Book -> List Book -> List Book
-saveBook book list =
-    let
-        ids =
-            List.map (\item -> item.id) list
-    in
-        if List.member book.id ids then
-            List.map
-                (\item ->
-                    if item.id == book.id then
-                        book
-                    else
-                        item
-                )
-                list
-        else
-            book :: list
-
-
-updateFormData : Book -> Msg -> Book
-updateFormData formData msg =
-    case msg of
-        UpdateTitle value ->
-            { formData
-                | title = value
-            }
-
-        UpdateAuthor value ->
-            { formData
-                | author = value
-            }
-
-        UpdateReading value ->
-            { formData
-                | reading = value
-            }
-
-        UpdateRead value ->
-            { formData
-                | read = Result.withDefault 0 (String.toInt value)
-            }
-
-        _ ->
-            formData
-
-
-
--- view
 
 
 emptyData : Maybe Book -> Bool
@@ -282,31 +140,42 @@ actionsRow book =
         ]
 
 
-booksTable : List Book -> Html Msg
-booksTable books =
-    table [ class "table" ]
-        [ thead []
-            [ tr []
-                [ th []
-                    [ text "#" ]
-                , th []
-                    [ text "Title" ]
-                , th []
-                    [ text "Author" ]
-                , th []
-                    [ text "Reading" ]
-                , th []
-                    [ text "% readed" ]
-                , th []
-                    [ text "Actions" ]
+booksTable : WebData (List Book) -> Html Msg
+booksTable booksResponse =
+    case booksResponse of
+        Success books ->
+            table [ class "table" ]
+                [ thead []
+                    [ tr []
+                        [ th []
+                            [ text "#" ]
+                        , th []
+                            [ text "Title" ]
+                        , th []
+                            [ text "Author" ]
+                        , th []
+                            [ text "Reading" ]
+                        , th []
+                            [ text "% readed" ]
+                        , th []
+                            [ text "Actions" ]
+                        ]
+                    ]
+                , tbody [] (List.map bookRow books)
                 ]
-            ]
-        , tbody [] (List.map bookRow books)
-        ]
+
+        Loading ->
+            div [] [ text "Loading..." ]
+
+        NotAsked ->
+            div [] [ text "Initializing.." ]
+
+        Failure err ->
+            div [] [ text ("Error: " ++ toString err) ]
 
 
-view : Model -> Html Msg
-view model =
+root : Model -> Html Msg
+root model =
     let
         col =
             Bootstrap.col
