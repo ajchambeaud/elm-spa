@@ -5,7 +5,7 @@ import Html exposing (..)
 import Html.Attributes exposing (id, class, classList, src, name, type_, title, value, for, disabled, scope)
 import Books.Types exposing (..)
 import Html.Events exposing (..)
-import Bootstrap exposing (..)
+import Helpers.Bootstrap as Bootstrap exposing (..)
 
 
 emptyData : Maybe Book -> Bool

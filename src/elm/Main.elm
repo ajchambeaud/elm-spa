@@ -4,6 +4,8 @@ import Types exposing (..)
 import View exposing (..)
 import State exposing (..)
 import Html exposing (..)
+import Navigation exposing (..)
+import Routing exposing (locationToMsg)
 
 
 subscriptions : Model -> Sub Msg
@@ -13,7 +15,7 @@ subscriptions model =
 
 main : Program Never Model Msg
 main =
-    Html.program
+    Navigation.program locationToMsg
         { init = init
         , update = update
         , view = View.rootView

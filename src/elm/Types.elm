@@ -14,9 +14,11 @@ type alias Model =
 type Page
     = BooksPage
     | CategoriesPage
+    | NotFound
 
 
 type Msg
     = ChangePage Page
+    | Navigate Page
     | BooksMsg Books.Msg
     | CategoriesMsg Categories.Msg

@@ -1,4 +1,4 @@
-module Bootstrap exposing (..)
+module Helpers.Bootstrap exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)

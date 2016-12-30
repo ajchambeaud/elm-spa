@@ -5,29 +5,48 @@ import Books.State
 import Categories.State
 import Books.Rest
 import Categories.Rest
+import Navigation exposing (..)
+import Routing exposing (..)
 
 
-init : ( Model, Cmd Msg )
-init =
-    ( initModel, initialCmd )
+init : Location -> ( Model, Cmd Msg )
+init location =
+    let
+        page =
+            hashToPage location.hash
+    in
+        ( initModel page, initialCmd page )
 
 
-initModel : Model
-initModel =
-    { page = BooksPage
+initModel : Page -> Model
+initModel page =
+    { page = page
     , books = Tuple.first Books.State.init
     , categories = Tuple.first Categories.State.init
     }
 
 
-initialCmd : Cmd Msg
-initialCmd =
-    Cmd.map BooksMsg Books.Rest.getBooksCmd
+initialCmd : Page -> Cmd Msg
+initialCmd page =
+    case page of
+        BooksPage ->
+            Cmd.map BooksMsg Books.Rest.getBooksCmd
+
+        CategoriesPage ->
+            Cmd.map CategoriesMsg Categories.Rest.getCategoriesCmd
+
+        NotFound ->
+            Cmd.none
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        Navigate page ->
+            ( model
+            , newUrl <| pageToHash page
+            )
+
         ChangePage page ->
             ( { model
                 | page = page
@@ -38,6 +57,9 @@ update msg model =
 
                 CategoriesPage ->
                     Cmd.map CategoriesMsg Categories.Rest.getCategoriesCmd
+
+                NotFound ->
+                    Cmd.none
             )
 
         BooksMsg booksMsg ->

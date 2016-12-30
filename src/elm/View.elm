@@ -3,10 +3,11 @@ module View exposing (rootView)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Bootstrap exposing (..)
+import Helpers.Bootstrap as Bootstrap exposing (..)
 import Types exposing (..)
 import Books.View as Books
 import Categories.View as Categories
+import Layouts.NotFound as NotFound
 
 
 sideMenuStyle : Attribute msg
@@ -23,8 +24,7 @@ sideMenu page =
             , attribute "role" "presentation"
             ]
             [ a
-                [ href "#"
-                , onClick (ChangePage BooksPage)
+                [ onClick (Navigate BooksPage)
                 ]
                 [ text "Books" ]
             ]
@@ -33,8 +33,7 @@ sideMenu page =
             , attribute "role" "presentation"
             ]
             [ a
-                [ href "#"
-                , onClick (ChangePage CategoriesPage)
+                [ onClick (Navigate CategoriesPage)
                 ]
                 [ text "Categories" ]
             ]
@@ -53,6 +52,9 @@ rootView model =
                 CategoriesPage ->
                     Html.map CategoriesMsg
                         (Categories.root model.categories)
+
+                NotFound ->
+                    NotFound.root model
 
         col =
             Bootstrap.col
